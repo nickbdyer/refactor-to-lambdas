@@ -1,6 +1,8 @@
 package lambdas;
 
 import java.io.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.lang.Integer.parseInt;
 
@@ -25,25 +27,39 @@ public class NumberValidator {
     }
 
     public int promptUntilValidMenuChoice() {
-        promptForMenuChoice();
-        String input = readInput();
-
-        while (invalidMenuChoice(input)) {
-            promptForMenuChoice();
-            input = readInput();
-        }
-        return parseToInt(input);
+        return promptUntilValid(getPromptFunctionForMenu(), getValidateInputForMenuFunction());
     }
 
     public int promptUntilValidNumberEntered() {
-        promptForNumber();
+        return promptUntilValid(getPromptFunctionForNumber(), getValidateInputForNumberFunction());
+    }
+
+    public int promptUntilValid(Runnable prompt, Function<String, Boolean> validation) {
+        prompt.run();
         String input = readInput();
 
-        while (invalid(input)) {
-            promptForNumber();
+        while (validation.apply(input)) {
+            prompt.run();
             input = readInput();
         }
+
         return parseToInt(input);
+    }
+
+    private Runnable getPromptFunctionForMenu() {
+        return this::promptForMenuChoice;
+    }
+
+    private Runnable getPromptFunctionForNumber() {
+        return this::promptForNumber;
+    }
+
+    private Function<String, Boolean> getValidateInputForMenuFunction() {
+        return this::invalidMenuChoice;
+    }
+
+    private Function<String, Boolean> getValidateInputForNumberFunction() {
+        return this::invalid;
     }
 
     private void promptForMenuChoice() {
@@ -113,4 +129,5 @@ public class NumberValidator {
             return false;
         }
     }
+
 }
